@@ -1,22 +1,30 @@
 import configureStore from './store/configureStore';
-import {bugAdded,bugResolved} from './store/bugs';
+import {bugAdded,bugResolved, getUnresolvedBugs,assignBugUser,getUserBugs} from './store/bugs';
+import {productAdded} from './store/products';
+import {userAdded} from './store/users';
 
 
 const store = configureStore();
 
-const unsubscribe = store.subscribe(()=>{
-    console.log('store changed', store.getState());
-})
+store.dispatch(userAdded({name: 'Maksatbek'}));
+store.dispatch(userAdded({name: 'Beknur'}));
+store.dispatch(userAdded({name: 'Doolat'}));
 
 store.dispatch(bugAdded({description: 'Bug one'}));
 
-store.dispatch(bugAdded({description: 'Bug Lat'}));
+store.dispatch(bugAdded({description: 'Bug two'}));
 
-unsubscribe();  
+store.dispatch(assignBugUser({userId:1,bugId:2}));
 
-store.dispatch(bugAdded({description:'Bug two'}));
+store.dispatch(bugAdded({description:'Bug three'}));
 
-store.dispatch(bugResolved({id:2}));
 
-console.log(store.getState());
 
+store.dispatch(productAdded({
+    name: 'Carrot'
+}));
+
+
+
+const userBugs = getUserBugs(2)(store.getState());
+console.log(userBugs);

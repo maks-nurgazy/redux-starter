@@ -1,28 +1,47 @@
-import {createAction, createReducer} from '@reduxjs/toolkit';
+import { createSlice} from '@reduxjs/toolkit';
+import {createSelector } from 'reselect';
 
-
-export const bugAdded = createAction('bugAddeda');
-export const bugResolved = createAction('bugResolved');
-export const bugRemoved = createAction('bugRemoved');
-
-
-// Reducer
 let lastId = 0;
 
-export default createReducer([], {
+const slice = createSlice({
+    name: 'bugs',
+    initialState: [],
+    reducers: {
+        bugAdded: (bugs,action) => {
+            bugs.push({
+                id: ++lastId,
+                    description: action.payload.description,
+                    resolved: false
+            });
+        },
 
-    [bugAdded.type] : (bugs,action) =>{
-        bugs.push({
-            id: ++lastId,
-                description: action.payload.description,
-                resolved: false
-        });
-    },
-    [bugResolved.type] : (bugs, action) => {
-        const index = bugs.findIndex(bug=>bug.id === action.payload.id);
-        bugs[index].resolved = true;
-    },
-    [bugRemoved.type] : (bugs, action) => {
-        bugs = bugs.filter(bug=>bug.id !==action.payload.id);
+        bugResolved : (bugs, action) => {
+            const index = bugs.findIndex(bug=>bug.id === action.payload.id);
+            bugs[index].resolved = true;
+        },
+        bugRemoved : (bugs, action) => {
+            bugs = bugs.filter(bug=>bug.id !==action.payload.id);
+        },
+        assignBugUser: (bugs, action)=>{
+            const bugIndex = bugs.findIndex(bug=>bug.id===action.payload.bugId);
+            bugs[bugIndex].user = action.payload.userId;
+        }
+
     }
 });
+
+
+export const {bugAdded,bugRemoved,bugResolved,assignBugUser} = slice.actions;
+export default slice.reducer;
+
+
+export const getUnresolvedBugs = createSelector(
+    state => state.entities.bugs,
+    state => state.entities.projects,
+    bugs => bugs.filter(bug=> !bug.resolved)
+);
+
+export const getUserBugs=(userId)=> createSelector(
+    state => state.entities.bugs,
+    bugs => bugs.filter(bug=> bug.user === userId)
+);
